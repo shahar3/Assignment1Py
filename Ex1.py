@@ -200,7 +200,7 @@ def extractFileContent(fileObject):
 
 
 # An helper method that get a line of parts from our text and cast them to their appropriate type
-def castToType(fixedParts, parts):
+def castToType(parts):
     fixedParts = []
     for part in parts:
         partType = getType(part)
