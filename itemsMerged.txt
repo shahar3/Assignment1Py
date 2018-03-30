@@ -1,0 +1,6 @@
+0::Bowling Skating Rinks::file1
+1::Recreation Centers Party & Event Planning::file1
+2::Gyms Trainers::file1
+0::Health and Medical Cosmetics & Beauty Supply::file2
+1::Nail Salons Skin Care::file2
+2::Hair Salons Makeup Artists Hair Removal::file2
