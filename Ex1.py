@@ -150,7 +150,7 @@ def like(inputFile, columnIndex, parameter='*'):
             # now look for the regular expression in the file
             columnVals = list(map(lambda line: line.pop(int(columnIndex)), file))
             # Ternary condition
-            r = re.compile(".*") if parameter == '*' else r = re.compile(parameter)
+            #r = re.compile(".*") if parameter == '*' else r = re.compile(parameter)
             filteredColumn = list(filter(r.match, columnVals))
             print filteredColumn
         else:
