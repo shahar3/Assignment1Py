@@ -1,4 +1,4 @@
-import sys, csv, os
+import sys, csv, re
 
 
 # Our main method. In charge of all the logic of the program
@@ -135,7 +135,7 @@ def distinct(inputFile, columnIndex, outputFile):
         if (int(columnIndex) < len(file[0])):
             # get only unique values using set
             columnVals = sorted(set(map(lambda line: line.pop(int(columnIndex)), file)))
-            writeToFile(outputFile, columnVals,distinct=True)
+            writeToFile(outputFile, columnVals, distinct=True)
         else:
             print "Error! Column does not exist in table"
     pass
@@ -145,6 +145,16 @@ def distinct(inputFile, columnIndex, outputFile):
 def like(inputFile, columnIndex, parameter='*'):
     if validateFileNames(inputFile) == 0:
         file = readFile(inputFile, getFileExtension(inputFile))
+        # Check if the column index is in the structure range
+        if (int(columnIndex) < len(file[0])):
+            # now look for the regular expression in the file
+            columnVals = list(map(lambda line: line.pop(int(columnIndex)), file))
+            # Ternary condition
+            r = re.compile(".*") if parameter == '*' else r = re.compile(parameter)
+            filteredColumn = list(filter(r.match, columnVals))
+            print filteredColumn
+        else:
+            print "Error! Column does not exist in table"
     pass
 
 
@@ -222,9 +232,9 @@ def writeToFile(file, lines, origin=None, distinct=False):
     try:
         with open(file, 'a') as fileObj:
             for line in lines:
-                #check if the function was called from the distinct function
-                if(distinct):
-                    fileObj.write(str(line)+'\n')
+                # check if the function was called from the distinct function
+                if (distinct):
+                    fileObj.write(str(line) + '\n')
                 else:
                     if (origin != None):
                         fileObj.write('::'.join(str(word) for word in line) + "::" + origin + "\n")
