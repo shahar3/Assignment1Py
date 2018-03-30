@@ -135,7 +135,7 @@ def distinct(inputFile, columnIndex, outputFile):
         if (int(columnIndex) < len(file[0])):
             # get only unique values using set
             columnVals = sorted(set(map(lambda line: line.pop(int(columnIndex)), file)))
-            print columnVals
+            writeToFile(outputFile, columnVals,distinct=True)
         else:
             print "Error! Column does not exist in table"
     pass
@@ -143,6 +143,8 @@ def distinct(inputFile, columnIndex, outputFile):
 
 # Get all the records that equals to a certain parameter
 def like(inputFile, columnIndex, parameter='*'):
+    if validateFileNames(inputFile) == 0:
+        file = readFile(inputFile, getFileExtension(inputFile))
     pass
 
 
@@ -216,14 +218,18 @@ def castToType(parts):
 
 
 # Write the lines to a specific file
-def writeToFile(file, lines, origin=None):
+def writeToFile(file, lines, origin=None, distinct=False):
     try:
         with open(file, 'a') as fileObj:
             for line in lines:
-                if (origin != None):
-                    fileObj.write('::'.join(str(word) for word in line) + "::" + origin + "\n")
+                #check if the function was called from the distinct function
+                if(distinct):
+                    fileObj.write(str(line)+'\n')
                 else:
-                    fileObj.write('::'.join(str(word) for word in line) + "\n")
+                    if (origin != None):
+                        fileObj.write('::'.join(str(word) for word in line) + "::" + origin + "\n")
+                    else:
+                        fileObj.write('::'.join(str(word) for word in line) + "\n")
     except IOError:
         print "Error! Problem writing to file"
 
