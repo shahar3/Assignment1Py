@@ -150,8 +150,9 @@ def like(inputFile, columnIndex, parameter='*'):
             # now look for the regular expression in the file
             columnVals = list(map(lambda line: line.pop(int(columnIndex)), file))
             # Ternary condition
-            r = re.compile(".*") if parameter == '*' else r = re.compile(parameter)
-            filteredColumn = list(filter(r.match, columnVals))
+            r = re.compile(".*") if parameter == '*' else re.compile(parameter)
+            filteredColumn = [(idx, item) for idx, item in enumerate(columnVals) if re.match(r,item)]
+            #filteredColumn = list(filter(r.match, columnVals))
             print filteredColumn
         else:
             print "Error! Column does not exist in table"
