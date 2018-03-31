@@ -148,12 +148,12 @@ def like(inputFile, columnIndex, parameter='*'):
         # Check if the column index is in the structure range
         if (int(columnIndex) < len(file[0])):
             # now look for the regular expression in the file
-            columnVals = list(map(lambda line: line.pop(int(columnIndex)), file))
-            # Ternary condition
+            columnVals = list(map(lambda line: line[int(columnIndex)], file))
+            # Ternary condition to create our regex (regular expression)
             r = re.compile(".*") if parameter == '*' else re.compile(parameter)
             filteredColumn = [(idx, item) for idx, item in enumerate(columnVals) if re.match(r,item)]
-            #filteredColumn = list(filter(r.match, columnVals))
-            print filteredColumn
+            for item in filteredColumn:
+                print file[item[0]]
         else:
             print "Error! Column does not exist in table"
     pass
