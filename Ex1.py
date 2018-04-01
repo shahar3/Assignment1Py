@@ -79,8 +79,9 @@ def isTheSameStructure(file1, file2):
         i = 0
         for word1 in file1[0]:
             # check if the types of the files match
-            word1 = word1.rstrip()  # remove the \n from the end
-            word2 = file2[0][i].rstrip()
+            #word1 = word1.rstrip()  # remove the \n from the end
+            #word2 = file2[0][i].rstrip()
+            word2 = file2[0][i]
 
             type1 = getType(word1)
             type2 = getType(word2)
@@ -113,12 +114,12 @@ def getType(word):
 # Seperate one file into two files
 def seperate(inputFile, outputFile1, outputFile2):
     # read inputFile
-    if validateFileNames(inputFile) == 0:  # file extension is ok
+    if validateFileNames(inputFile, outputFile1, outputFile2) == 0:  # file extension is ok
         file = readFile(inputFile, getFileExtension(inputFile))
         # seperate the file into two files
         # filter all the file1 into a list and all file2 into another list
         file1 = list(map(lambda line: line[:-1], filter(lambda line: line[len(line) - 1] == 'file1', file)))
-        file2 = list(filter(lambda line: line[len(line) - 1] == 'file2', file))
+        file2 = list(map(lambda line: line[:-1], filter(lambda line: line[len(line) - 1] == 'file2', file)))
         print file1
 
         # write the list to different files
@@ -129,7 +130,7 @@ def seperate(inputFile, outputFile1, outputFile2):
 
 # Get all the unique values of a certain column
 def distinct(inputFile, columnIndex, outputFile):
-    if validateFileNames(inputFile) == 0:
+    if validateFileNames(inputFile, outputFile) == 0:
         file = readFile(inputFile, getFileExtension(inputFile))
         # Check if the column index is in the structure range
         if (int(columnIndex) < len(file[0])):
@@ -182,10 +183,12 @@ def validateFileNames(*files):
 # An helper method that return the file content
 def readFile(file, extension):
     if (extension == "csv"):
-        # read csv file
-        fileObject = open(file)
-        print fileObject.read()
-        pass
+        try:
+            # read csv file
+            with open(file) as fileObject:
+                return csv.reader(fileObject)
+        except IOError:
+            print 'The file ' + file + " doesn't exist"
     else:
         try:
             # read txt file
