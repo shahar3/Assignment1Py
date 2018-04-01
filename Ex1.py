@@ -152,7 +152,7 @@ def like(inputFile, columnIndex, parameter='*'):
             columnVals = list(map(lambda line: line[int(columnIndex)], file))
             # Ternary condition to create our regex (regular expression)
             r = re.compile(".*") if parameter == '*' else re.compile(parameter)
-            filteredColumn = [(idx, item) for idx, item in enumerate(columnVals) if re.match(r,item)]
+            filteredColumn = [(idx, item) for idx, item in enumerate(columnVals) if re.match(r, item)]
             for item in filteredColumn:
                 print file[item[0]]
         else:
@@ -186,21 +186,21 @@ def readFile(file, extension):
         try:
             # read csv file
             with open(file) as fileObject:
-                return csv.reader(fileObject)
+                return extractFileCsv(fileObject)
         except IOError:
             print 'The file ' + file + " doesn't exist"
     else:
         try:
             # read txt file
             with open(file) as fileObject:
-                return extractFileContent(fileObject)
+                return extractFileTxt(fileObject)
         except IOError:
             print 'The file ' + file + " doesn't exist"
 
 
 # An helper method to extract the content of a txt file.
 # it returns the casted text as a list of lists
-def extractFileContent(fileObject):
+def extractFileTxt(fileObject):
     fileContent = []
     for line in fileObject:
         # split each line by the seperator
@@ -214,6 +214,16 @@ def extractFileContent(fileObject):
         fileContent.append(fixedParts)
     return fileContent
 
+# An helper method to extract the content of a csv file.
+# it returns the casted text as a list of lists
+def extractFileCsv(fileObject):
+    fileContent = []
+    reader = csv.reader(fileObject.read().splitlines())
+    for line in reader:
+        # now cast each part to his type
+        fixedParts = castToType(line)
+        fileContent.append(fixedParts)
+    return fileContent
 
 # An helper method that get a line of parts from our text and cast them to their appropriate type
 def castToType(parts):
