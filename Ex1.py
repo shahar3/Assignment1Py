@@ -120,7 +120,7 @@ def seperate(inputFile, outputFile1, outputFile2):
         # filter all the file1 into a list and all file2 into another list
         file1 = list(map(lambda line: line[:-1], filter(lambda line: line[len(line) - 1] == 'file1', file)))
         file2 = list(map(lambda line: line[:-1], filter(lambda line: line[len(line) - 1] == 'file2', file)))
-        print file1
+        #print file1
 
         # write the list to different files
         writeToFile(outputFile1, file1)
@@ -189,14 +189,14 @@ def readFile(file, extension):
             with open(file) as fileObject:
                 return extractFileCsv(fileObject)
         except IOError:
-            print 'The file ' + file + " doesn't exist"
+            print "The file " + file + " doesn't exist"
     else:
         try:
             # read txt file
             with open(file) as fileObject:
                 return extractFileTxt(fileObject)
         except IOError:
-            print 'The file ' + file + " doesn't exist"
+            print "The file " + file + " doesn't exist"
 
 
 # An helper method to extract the content of a txt file.
@@ -205,9 +205,8 @@ def extractFileTxt(fileObject):
     fileContent = []
     for line in fileObject:
         # split each line by the seperator
-        # Check if the seperator is : or ::
         if (line.find("::") == -1):
-            parts = line.rstrip().split(":")
+            parts = line.rstrip()
         else:
             parts = line.rstrip().split("::")
         # now cast each part to his type
@@ -245,18 +244,44 @@ def castToType(parts):
 # Write the lines to a specific file
 def writeToFile(file, lines, origin=None, distinct=False):
     try:
-        with open(file, 'a') as fileObj:
-            for line in lines:
-                # check if the function was called from the distinct function
-                if (distinct):
-                    fileObj.write(str(line) + '\n')
-                else:
-                    if (origin != None):
-                        fileObj.write('::'.join(str(word) for word in line) + "::" + origin + "\n")
+        if(getFileExtension(file) == "csv"):
+            with open(file, 'ab') as fileObj:
+                writer = csv.writer(fileObj)
+                for line in lines:
+                    # check if the function was called from the distinct function
+                    if (distinct):
+                        writer.writerow(str(line) + '\n')
                     else:
-                        fileObj.write('::'.join(str(word) for word in line) + "\n")
+                        if (origin != None):
+                            line.append(origin)
+                            writer.writerow(line)
+                        else:
+                            writer.writerow(line)
+        else:
+            with open(file, 'a') as fileObj:
+                for line in lines:
+                    # check if the function was called from the distinct function
+                    if (distinct):
+                        fileObj.write(str(line) + '\n')
+                    else:
+                        if (origin != None):
+                            fileObj.write('::'.join(str(word) for word in line) + "::" + origin + "\n")
+                        else:
+                            fileObj.write('::'.join(str(word) for word in line) + "\n")
     except IOError:
         print "Error! Problem writing to file"
+
+def writeToCsvFile():
+    fileContent = []
+    with open("itemsMerged.txt") as fileObject:
+        for line in fileObject:
+            parts = line.rstrip().split("::")
+            fixedParts = castToType(parts)
+            fileContent.append(fixedParts)
+    with open("itemsMerged.csv", 'wb') as fileObj:
+        writer = csv.writer(fileObj)
+        for line in fileContent:
+            writer.writerow(line)
 
 
 # Check if we run the program as our main program, if so call the main function with our arguments array
