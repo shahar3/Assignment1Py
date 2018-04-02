@@ -143,7 +143,7 @@ def distinct(inputFile, columnIndex, outputFile):
 
 
 # Get all the records that equals to a certain parameter
-def like(inputFile, columnIndex, parameter='*'):
+def like(inputFile, columnIndex, parameter='*', outputFile="LikeOutput.txt"):
     if validateFileNames(inputFile) == 0:
         file = readFile(inputFile, getFileExtension(inputFile))
         # Check if the column index is in the structure range
@@ -153,6 +153,7 @@ def like(inputFile, columnIndex, parameter='*'):
             # Ternary condition to create our regex (regular expression)
             r = re.compile(".*") if parameter == '*' else re.compile(parameter)
             filteredColumn = [(idx, item) for idx, item in enumerate(columnVals) if re.match(r, item)]
+            writeToFile(outputFile, filteredColumn)
             for item in filteredColumn:
                 print file[item[0]]
         else:
