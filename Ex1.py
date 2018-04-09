@@ -141,7 +141,13 @@ def distinct(inputFile, columnIndex, outputFile):
         try:
             if (int(columnIndex) < len(file[0])):
                 # get only unique values using set
-                columnVals = sorted(set(map(lambda line: line.pop(int(columnIndex)), file)))
+                columnVals = set(map(lambda line: line.pop(int(columnIndex)), file))
+                typeValue = getType(next(iter(columnVals)))
+                if typeValue == int:
+                    columnVals = [int(x) for x in columnVals]
+                elif typeValue == float:
+                    columnVals = [float(x) for x in columnVals]
+                columnVals = sorted(columnVals)
                 writeToFile(outputFile, columnVals, distinct=True)
             else:
                 print "Error! Column does not exist in table"
