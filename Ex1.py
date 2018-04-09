@@ -65,12 +65,14 @@ def union(inputFile1, inputFile2, outputFile):
         # open the file
         file1 = readFile(inputFile1, getFileExtension(inputFile1))
         file2 = readFile(inputFile2, getFileExtension(inputFile2))
+        if(file1==None or file2==None):
+            return
 
         # check that the 2 files have the same structure (the same number of columns and types)
         if isTheSameStructure(file1, file2):
             # write the files content into the output file
-            writeToFile(outputFile, file1, 'file1')
-            writeToFile(outputFile, file2, 'file2')
+            writeToFile(outputFile, file1,append=True, origin='file1')
+            writeToFile(outputFile, file2,append=True, origin='file2')
 
 
 # An helper method to check if the 2 input file have the same structure
@@ -121,7 +123,8 @@ def seperate(inputFile, outputFile1, outputFile2):
         file1 = list(map(lambda line: line[:-1], filter(lambda line: line[len(line) - 1] == 'file1', file)))
         file2 = list(map(lambda line: line[:-1], filter(lambda line: line[len(line) - 1] == 'file2', file)))
         #print file1
-
+        if(file1==None or file2==None):
+            return
         # write the list to different files
         writeToFile(outputFile1, file1)
         writeToFile(outputFile2, file2)
@@ -132,13 +135,18 @@ def seperate(inputFile, outputFile1, outputFile2):
 def distinct(inputFile, columnIndex, outputFile):
     if validateFileNames(inputFile, outputFile) == 0:
         file = readFile(inputFile, getFileExtension(inputFile))
+        if(file == None):
+            return
         # Check if the column index is in the structure range
-        if (int(columnIndex) < len(file[0])):
-            # get only unique values using set
-            columnVals = sorted(set(map(lambda line: line.pop(int(columnIndex)), file)))
-            writeToFile(outputFile, columnVals, distinct=True)
-        else:
-            print "Error! Column does not exist in table"
+        try:
+            if (int(columnIndex) < len(file[0])):
+                # get only unique values using set
+                columnVals = sorted(set(map(lambda line: line.pop(int(columnIndex)), file)))
+                writeToFile(outputFile, columnVals, distinct=True)
+            else:
+                print "Error! Column does not exist in table"
+        except ValueError:
+            print "Usage: DISTINCT <input file path> <column index> <output file path>\n"
     pass
 
 
@@ -146,18 +154,26 @@ def distinct(inputFile, columnIndex, outputFile):
 def like(inputFile, columnIndex, parameter='*', outputFile="LikeOutput.txt"):
     if validateFileNames(inputFile) == 0:
         file = readFile(inputFile, getFileExtension(inputFile))
+        if(file==None):
+            return
         # Check if the column index is in the structure range
-        if (int(columnIndex) < len(file[0])):
-            # now look for the regular expression in the file
-            columnVals = list(map(lambda line: line[int(columnIndex)], file))
-            # Ternary condition to create our regex (regular expression)
-            r = re.compile(".*") if parameter == '*' else re.compile(parameter)
-            filteredColumn = [(idx, item) for idx, item in enumerate(columnVals) if re.match(r, item)]
-            writeToFile(outputFile, filteredColumn)
-            for item in filteredColumn:
-                print file[item[0]]
-        else:
-            print "Error! Column does not exist in table"
+        try:
+            if (int(columnIndex) < len(file[0])):
+                # now look for the regular expression in the file
+                columnVals = list(map(lambda line: str(line[int(columnIndex)]), file))
+                # Ternary condition to create our regex (regular expression)
+                r = re.compile(".*") if parameter == '*' else re.compile(parameter)
+                filteredColumn = [(idx, item) for idx, item in enumerate(columnVals) if re.match(r, item)]
+                output = []
+                for row in filteredColumn:
+                    index = row[0]
+                    #take the rows from the original file
+                    output.append(file[index])
+                writeToFile(outputFile, output)
+            else:
+                print "Error! Column does not exist in table"
+        except IndexError:
+            print "Usage: LIKE <input file path> <column index> [parameter]\n"
     pass
 
 
@@ -197,6 +213,7 @@ def readFile(file, extension):
                 return extractFileTxt(fileObject)
         except IOError:
             print "The file " + file + " doesn't exist"
+            return None
 
 
 # An helper method to extract the content of a txt file.
@@ -242,10 +259,11 @@ def castToType(parts):
 
 
 # Write the lines to a specific file
-def writeToFile(file, lines, origin=None, distinct=False):
+def writeToFile(file, lines, append=False, origin=None, distinct=False):
     try:
+        writeMode = 'a' if append else 'w'
         if(getFileExtension(file) == "csv"):
-            with open(file, 'ab') as fileObj:
+            with open(file, writeMode+'b') as fileObj:
                 writer = csv.writer(fileObj)
                 for line in lines:
                     # check if the function was called from the distinct function
@@ -258,7 +276,7 @@ def writeToFile(file, lines, origin=None, distinct=False):
                         else:
                             writer.writerow(line)
         else:
-            with open(file, 'a') as fileObj:
+            with open(file, writeMode) as fileObj:
                 for line in lines:
                     # check if the function was called from the distinct function
                     if (distinct):
